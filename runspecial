@@ -1,0 +1,38 @@
+#!/bin/bash
+
+FILE="$1"
+FILE2="$2"
+
+FILEPATH=$pwd
+FILEPATH2=$(dirname `pwd`)
+
+FIND=$(find $FILEPATH -follow -name "special")
+
+# This part checks if an argument was given
+if [[ $# -eq 0 ]] ; then
+    echo 'No file provided'
+    exit 1
+fi
+
+# Here we check if the file exists
+if [ ! -f $FILE ]; then
+    echo "File $FILE does not exist."
+    exit 1
+fi
+
+# Here we check if the special exist, and the run it
+if [[ -f $FIND ]]; then
+    $FIND -nogui $FILE
+else
+    echo "special does not exist."
+fi
+
+# We can run a figure script if if is suplied
+if [[ ! -z $2 ]] ; then
+    FIND2=$(find $FILEPATH2/figures -name "$FILE2")
+    if [[ -f $FIND2 ]]; then
+	$FIND2
+    else
+	echo "The figure file does not exist."
+    fi    
+fi

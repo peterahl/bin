@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# This scripts compiles three times with pdflatex. Good for compiling the heads for the beamer presentations.
+
+# This part checks if an argument was given
+if [[ $# -eq 0 ]] ; then
+    echo 'No file provided'
+    exit 1
+fi
+
+FILE="$1"
+
+# change openout_any = p to openout_any = a in
+# /usr/share/texlive/texmf-dist/web2c/texmf.cnf
+# if you use a hiden sub directory
+
+DIR=".build"
+
+if [ ! -d $DIR ]; then
+    mkdir $DIR
+    echo "Created directory $DIR"
+else
+    echo "The directory $DIR exists"
+fi
+
+echo 
+
+if [ -f $FILE ]; then
+    pdflatex -output-directory=$DIR $FILE
+    mv $DIR/${FILE%.*}.pdf ${FILE%.*}.pdf
+#    evince $FILE.pdf
+else
+   echo "File $FILE.tex does not exist."
+fi
+
+

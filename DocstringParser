@@ -1,0 +1,76 @@
+#!/usr/bin/python3
+import glob
+import os.path
+
+text_strings = list()
+
+hoc_string = "#-*-#"
+python_string = '"""'
+filetype = 'none'
+
+def sorting(string):
+    integer = ''
+    for i in string:
+    	if i.isdigit():
+            integer += i
+    try: return int(integer)
+    except ValueError: return string
+
+for hocfile in sorted(glob.glob('*.hoc'), key=sorting):
+    filetype = 'hoc'
+    with open(hocfile) as f:
+        text = f.read()
+        if hoc_string in text:
+            text_strings.append(text.split(hoc_string)[1].replace('\n','  \n'))
+
+for modfile in sorted(glob.glob('*.mod')):
+    filetype = 'mod'
+    with open(modfile) as f:
+        text = f.read()
+        if hoc_string in text:
+            text_strings.append(text.split(hoc_string)[1].replace('\n','  \n'))
+
+for pyfile in sorted(glob.glob('*.py'), key=sorting):
+    filetype = 'py'
+    with open(pyfile) as f:
+        text = f.read()
+        if python_string in text:
+            text_strings.append(text.split(python_string)[1].replace('\n','  \n'))
+
+
+if filetype == 'hoc':
+    if os.path.exists('SCRIPTS.md'): 
+        if len(text_strings) == 0:
+            print('No doctstrings found')
+        else:
+            with open('SCRIPTS.md', 'w') as script_file:
+                for text in text_strings:
+                    script_file.write(text)
+    else:
+        print('SCRIPTS.md does not exist')
+
+elif filetype == 'mod':
+    if os.path.exists('MODFILES.md'):
+        if len(text_strings) == 0:
+            print('No doctstrings found')
+        else:
+            with open('MODFILES.md', 'w') as script_file:
+                for text in text_strings:
+                    script_file.write(text)
+    else:
+        print('MODFILES.md does not exist')
+
+elif filetype == 'py':
+    if os.path.exists('FIGURES.md'):
+        if len(text_strings) == 0:
+            print('No doctstrings found')
+        else:
+            with open('FIGURES.md', 'w') as script_file:
+                for text in text_strings:
+                    script_file.write(text)
+    else:
+        print('FIGURES.md does not exist')
+
+
+else:
+    print('No doctstrings found')
