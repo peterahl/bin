@@ -4,8 +4,8 @@ import os.path
 
 text_strings = list()
 
-hoc_string = "#-*-#"
 python_string = '"""'
+hoc_string = '/*'
 filetype = 'none'
 
 def sorting(string):
@@ -19,14 +19,14 @@ def sorting(string):
 for hocfile in sorted(glob.glob('*.hoc'), key=sorting):
     filetype = 'hoc'
     with open(hocfile) as f:
-        text = f.read()
-        if hoc_string in text:
+        text = f.read().replace('*/', '/*')
+        if docstring in text:
             text_strings.append(text.split(hoc_string)[1].replace('\n','  \n'))
 
 for modfile in sorted(glob.glob('*.mod')):
     filetype = 'mod'
     with open(modfile) as f:
-        text = f.read()
+        text = f.read().replace('*/', '/*')
         if hoc_string in text:
             text_strings.append(text.split(hoc_string)[1].replace('\n','  \n'))
 
