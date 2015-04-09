@@ -1,76 +1,73 @@
 #!/usr/bin/python3
 import glob
 import os.path
-
-text_strings = list()
+import re
 
 python_string = '"""'
-hoc_string = '/*'
-filetype = 'none'
-
-def sorting(string):
-    integer = ''
-    for i in string:
-    	if i.isdigit():
-            integer += i
-    try: return int(integer)
-    except ValueError: return string
-
-for hocfile in sorted(glob.glob('*.hoc'), key=sorting):
-    filetype = 'hoc'
-    with open(hocfile) as f:
-        text = f.read().replace('*/', '/*')
-        if docstring in text:
-            text_strings.append(text.split(hoc_string)[1].replace('\n','  \n'))
-
-for modfile in sorted(glob.glob('*.mod')):
-    filetype = 'mod'
-    with open(modfile) as f:
-        text = f.read().replace('*/', '/*')
-        if hoc_string in text:
-            text_strings.append(text.split(hoc_string)[1].replace('\n','  \n'))
-
-for pyfile in sorted(glob.glob('*.py'), key=sorting):
-    filetype = 'py'
-    with open(pyfile) as f:
-        text = f.read()
-        if python_string in text:
-            text_strings.append(text.split(python_string)[1].replace('\n','  \n'))
+hoc_string    = '/*'
+mod_string    = 'COMMENT'
+filetype      = 'none'
 
 
-if filetype == 'hoc':
-    if os.path.exists('SCRIPTS.md'): 
-        if len(text_strings) == 0:
-            print('No doctstrings found')
+def natural_sort_key(string_or_number):
+    """
+    by Scott S. Lawton <scott@ProductArchitect.com> 2014-12-11; public domain and/or CC0 license
+
+    handles cases where simple 'int' approach fails, e.g.
+        ['0.501', '0.55'] floating point with different number of significant digits
+        [0.01, 0.1, 1]    already numeric so regex and other string functions won't work (and aren't required)
+        ['elm1', 'Elm2']  ASCII vs. letters (not case sensitive)
+    """
+
+    def try_float(astring):
+        try:
+            return float(astring)
+        except:
+            return astring
+
+    if isinstance(string_or_number, str):
+        string_or_number = string_or_number.lower()
+
+        if len(re.findall('[.]\d', string_or_number)) <= 1:
+            # assume a floating point value, e.g. to correctly sort ['0.501', '0.55']
+            # '.' for decimal is locale-specific, e.g. correct for the Anglosphere and Asia but not continental Europe
+            return [try_float(s) for s in re.split(r'([\d.]+)', string_or_number)]
         else:
-            with open('SCRIPTS.md', 'w') as script_file:
-                for text in text_strings:
-                    script_file.write(text)
+            # assume distinct fields, e.g. IP address, phone number with '.', etc.
+            # caveat: might want to first split by whitespace
+            # TBD: for unicode, replace isdigit with isdecimal
+            return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_or_number)]
     else:
-        print('SCRIPTS.md does not exist')
+        # consider: add code to recurse for lists/tuples and perhaps other iterables
+        return string_or_number
 
-elif filetype == 'mod':
-    if os.path.exists('MODFILES.md'):
-        if len(text_strings) == 0:
-            print('No doctstrings found')
-        else:
-            with open('MODFILES.md', 'w') as script_file:
-                for text in text_strings:
-                    script_file.write(text)
+
+def write_docstrings(file_name, text):
+    if os.path.exists(file_name):
+        with open(file_name, 'w') as script_file:
+            for row in text:
+                script_file.write(row)
     else:
-        print('MODFILES.md does not exist')
+        print('{} does not exist'.format(file_name))
 
-elif filetype == 'py':
-    if os.path.exists('FIGURES.md'):
-        if len(text_strings) == 0:
-            print('No doctstrings found')
-        else:
-            with open('FIGURES.md', 'w') as script_file:
-                for text in text_strings:
-                    script_file.write(text)
+
+def string_parser(file_type, doc_string, replace_a, file_name):
+    text_strings  = list()
+    files_exist = False
+    for files in sorted(glob.glob('*.' + file_type), key=natural_sort_key):
+        files_exist = True
+        with open(files) as f:
+            text = f.read().replace(replace_a, doc_string)
+            if doc_string in text:
+                text_strings.append(text.split(doc_string)[1].replace('\n','  \n'))
+    if not files_exist:
+        pass
+    elif len(text_strings) == 0:
+        print('No {} doctstrings found'.format(file_type))
     else:
-        print('FIGURES.md does not exist')
+        write_docstrings(file_name, text_strings)
 
 
-else:
-    print('No doctstrings found')
+string_parser('hoc', hoc_string, '*/', 'SCRIPTS.md')
+string_parser('py', python_string, python_string, 'FIGURES.md')
+string_parser('mod', mod_string, 'ENDCOMMENT', 'MODFILES.md')

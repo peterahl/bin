@@ -6,7 +6,7 @@ FILE2="$2"
 FILEPATH=$pwd
 FILEPATH2=$(dirname `pwd`)
 
-FIND=$(find $FILEPATH -follow -name "special")
+FIND=$(find $FILEPATH2 -follow -name "special")
 
 # This part checks if an argument was given
 if [[ $# -eq 0 ]] ; then
