@@ -22,7 +22,7 @@ fi
 
 # Here we check if the special exist, and the run it
 if [[ -f $FIND ]]; then
-    $FIND -nogui $FILE
+    $FIND -nobanner -nogui $FILE
 else
     echo "special does not exist."
 fi
