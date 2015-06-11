@@ -8,7 +8,6 @@ hoc_string    = '/*'
 mod_string    = 'COMMENT'
 filetype      = 'none'
 
-
 def natural_sort_key(string_or_number):
     """
     by Scott S. Lawton <scott@ProductArchitect.com> 2014-12-11; public domain and/or CC0 license
@@ -51,7 +50,7 @@ def write_docstrings(file_name, text):
         print('{} does not exist'.format(file_name))
 
 
-def string_parser(file_type, doc_string, replace_a, file_name):
+def string_parser(file_type, doc_string, replace_a, file_name, file_type2 = 0):
     text_strings  = list()
     files_exist = False
     for files in sorted(glob.glob('*.' + file_type), key=natural_sort_key):
@@ -60,6 +59,12 @@ def string_parser(file_type, doc_string, replace_a, file_name):
             text = f.read().replace(replace_a, doc_string)
             if doc_string in text:
                 text_strings.append(text.split(doc_string)[1].replace('\n','  \n'))
+    if file_type2 != 0: # This is a uggly hac to add python to hoc parser
+        for files in sorted(glob.glob('*.' + 'py'), key=natural_sort_key):
+            with open(files) as f:
+                text = f.read()
+                if python_string in text:
+                    text_strings.append(text.split(python_string)[1].replace('\n','  \n'))        
     if not files_exist:
         pass
     elif len(text_strings) == 0:
@@ -68,6 +73,6 @@ def string_parser(file_type, doc_string, replace_a, file_name):
         write_docstrings(file_name, text_strings)
 
 
-string_parser('hoc', hoc_string, '*/', 'SCRIPTS.md')
+string_parser('hoc', hoc_string, '*/', 'SCRIPTS.md', 'py')
 string_parser('py', python_string, python_string, 'FIGURES.md')
 string_parser('mod', mod_string, 'ENDCOMMENT', 'MODFILES.md')
