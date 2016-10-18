@@ -1,0 +1,36 @@
+#!/usr/bin/python3
+import json
+from subprocess import call
+
+try:
+    with open('figures') as jfile:
+        figures = json.load(jfile)
+except FileNotFoundError:
+    print('figures finns inte')
+    exit()
+
+file_content = list()
+
+for i, file_name in enumerate(figures['figures']):
+    with open(file_name) as figure_file:
+        markdown = figure_file.read().split('"""')[1].split('\n')[1:]
+    del markdown[1]
+    caption = markdown[0].split(' - ')[1]
+    heading = '## Figure {}'.format(i+1)
+    del markdown[0]
+    figure = file_name.replace('py', 'pdf')
+    # markdown.insert(0, '![({}) {}](pdf_no_text/{})\n'.format(file_name,
+    #                                                          caption,
+    #                                                          figure))
+    markdown.append('![({}) {}](pdf_no_text/{})\n'.format(file_name,
+                                                             caption,
+                                                             figure))
+    markdown.insert(0, heading)
+    for line in markdown:
+        file_content.append(line)
+        
+with open('figures.md', 'w') as pfile:
+    for line in file_content:
+        pfile.write(line + '\n')
+        
+call(['pandoc', '--variable=geometry:a4paper', 'figures.md', '-o', 'figures.pdf'])
