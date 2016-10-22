@@ -3,8 +3,8 @@
 The scripts in this folder can be used to run simulations by adding them to the path. This can be done in many ways but in newer versions of ubunt, this is best done by adding them to the .profile in the home directory.
 
 Add the line:
-`export PATH=$PATH:/path/to/dir`
-to your ~/.profile file
+`export PATH="$PATH:/path/to/dir/"`
+to your ~/.zshrc (.bash_rc) file
 
 
 Se the official documentation for more info. [EnviromentVariables](https://help.ubuntu.com/community/EnvironmentVariables)
